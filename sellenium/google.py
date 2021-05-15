@@ -8,10 +8,12 @@ import urllib.request
 
 driver = webdriver.Chrome(executable_path = r'/Users/noyechan/Desktop/파이썬/selenium/sellenium/chromedriver')
 driver.get("https://www.weather.go.kr/w/index.do")
-elem = driver.find_element_by_xpath("//li[@class = 'cmp-cur-weather']")
-print("---")
-print(elem.get_attribute('text'))
-print("---")
+tmp = driver.find_element_by_css_selector(".tmp").text
+hue = driver.find_element_by_css_selector("span.val").text
+wind = driver.find_elements_by_css_selector("span.val")
+print(tmp)
+print(hue)
+print(wind[1].text)
 
 
 
