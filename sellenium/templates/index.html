@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+
+    <title>도시별 현재 날씨</title>
+
+    <script>
+      function order() {
+        $("#show_tmp").empty();
+        let cityName = $("#inlineFormInputGroupUsername2").val();
+        // 주문하기 API 연결
+        $.ajax({
+          type: "POST",
+          url: "/temp",
+          data: {
+            sample_name: cityName,
+          },
+          success: function (response) {
+            // 성공하면
+            if (response["msg"] == "완료") {
+              listing();
+            }
+          },
+        });
+      }
+
+      function listing() {
+        $.ajax({
+          type: "GET",
+          url: "/temp",
+          data: {},
+          success: function (response) {
+            if (response["result"] == "success") {
+              let temperate = response["information"];
+              console.log(temperate);
+              let name = temperate[temperate.length - 1]["name"];
+              let tmp = temperate[temperate.length - 1]["tmp"];
+
+              let temp_html = `<p>${name}'s 현재온도 : ${tmp}</p>`;
+              console.log(name, tmp);
+              $("#show_tmp").append(temp_html);
+            }
+          },
+        });
+      }
+    </script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Song+Myung&display=swap");
+      @font-face {
+        font-family: "CookieRunOTF-Bold";
+        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/CookieRunOTF-Bold00.woff")
+          format("woff");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      * {
+        font-family: "CookieRunOTF-Bold";
+      }
+
+      .input-group {
+        margin: 20px;
+      }
+
+      .main-form {
+        width: 600px;
+        margin: auto;
+        text-align: center;
+        margin-bottom: 300px;
+      }
+
+      #show_tmp {
+        font-size: 40px;
+      }
+
+      body {
+        margin-top: 150px;
+        text-align: center;
+      }
+      body:before {
+        content: "";
+        height: 100%;
+        display: inline-block;
+        vertical-align: middle;
+      }
+      button {
+        background: #bc80ee;
+        color: #fff;
+        border: none;
+        position: relative;
+        height: 60px;
+        font-size: 1.6em;
+        padding: 0 2em;
+        cursor: pointer;
+        transition: 800ms ease all;
+        outline: none;
+        margin-top: 40px;
+        margin-bottom: 40px;
+      }
+      button:hover {
+        background: #fff;
+        color: #bc80ee;
+      }
+      button:before,
+      button:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 2px;
+        width: 0;
+        background: #bc80ee;
+        transition: 400ms ease all;
+      }
+      button:after {
+        right: inherit;
+        top: inherit;
+        left: 0;
+        bottom: 0;
+      }
+      button:hover:before,
+      button:hover:after {
+        width: 100%;
+        transition: 800ms ease all;
+      }
+
+      button:focus {
+        border: none;
+        outline: none;
+      }
+
+      .lastinput {
+        margin-bottom: 50px;
+      }
+      th {
+        font-size: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="main-form">
+      <div class="text">
+        <h1>지역의 현재온도</h1>
+        <p>아래 박스에 온도를 알고싶은 도시를 입력하세요.</p>
+      </div>
+
+      <div class="input-group mb-2 mr-sm-2">
+        <div class="input-group-prepend">
+          <div class="input-group-text">도시 이름</div>
+        </div>
+        <input
+          type="text"
+          class="form-control"
+          id="inlineFormInputGroupUsername2"
+        />
+      </div>
+
+      <button onclick="order()">알아보기</button>
+      <div id="show_tmp">
+        <p></p>
+      </div>
+    </div>
+  </body>
+</html>

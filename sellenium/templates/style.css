@@ -1,0 +1,53 @@
+@import url("https://fonts.googleapis.com/css2?family=Song+Myung&display=swap");
+@import url("./button.css");
+@font-face {
+  font-family: "CookieRunOTF-Bold";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/CookieRunOTF-Bold00.woff")
+    format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+  font-family: "CookieRunOTF-Bold";
+}
+
+.input-group {
+  margin: 20px;
+}
+
+.main-form {
+  width: 800px;
+  height: 500px;
+  margin-bottom: 300px;
+  border: 1px solid black;
+  border-radius: 10px;
+}
+
+.text {
+  margin-bottom: 50px;
+}
+
+#show_tmp {
+  font-size: 40px;
+}
+
+body {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+body:before {
+  content: "";
+  height: 100%;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.lastinput {
+  margin-bottom: 50px;
+}
+th {
+  font-size: 20px;
+}
