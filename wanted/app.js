@@ -1,51 +1,88 @@
 const puppeteer = require("puppeteer")
-const pageDown = require("./utils/pageDown")
 
 async function run() {
   const browser = await puppeteer.launch({ headless: false })
   const page = await browser.newPage()
 
   await page.setViewport({ width: 1280, height: 720 })
-  await page.goto("https://www.wanted.co.kr/")
+  await page.goto("https://www.wanted.co.kr/wdlist/518/669") // 프론트엔드 페이지
 
-  await page.waitForSelector(".Menu_className__gGcYQ")
-  const menuElement = await page.$(".Menu_className__gGcYQ")
-  const firstLiElement = await menuElement.$("li")
-  await firstLiElement.click()
+  await page.waitForSelector("[data-cy='job-card']")
 
-  await page.waitForSelector(".JobGroup_JobGroup__H1m1m")
-  await page.click(".JobGroup_JobGroup__H1m1m")
+  let prevNumElements = 0
+  let scrollCount = 0
 
-  await page.waitForSelector('[data-job-category-id="518"]')
-  await page.click('[data-job-category-id="518"]')
+  // 스크롤 시작
+  while (true) {
+    await page.evaluate(() => {
+      window.scrollBy(0, window.innerHeight)
+    })
+    await page.waitForTimeout(1000)
 
-  await page.waitForSelector(".JobCategory_JobCategory__btn__k3EFe")
-  await page.click(".JobCategory_JobCategory__btn__k3EFe")
-
-  await page.waitForSelector(".JobCategoryItem_JobCategoryItem__oUaZr")
-  const jobCategories = await page.$$(".JobCategoryItem_JobCategoryItem__oUaZr")
-  for (let jobCategory of jobCategories) {
-    const jobCategoryText = await page.evaluate(
-      el => el.textContent,
-      jobCategory
-    )
-    if (jobCategoryText === "프론트엔드 개발자") {
-      await jobCategory.click()
-      break
+    // 3번의 스크롤마다 요소의 수를 체크합니다.
+    if (++scrollCount % 3 === 0) {
+      const elements = await page.$$("[data-cy='job-card']")
+      console.log(elements.length, prevNumElements)
+      if (prevNumElements === elements.length) {
+        console.log("스크롤 종료!")
+        break
+      }
+      prevNumElements = elements.length
     }
   }
 
-  await page.click(".Button_Button__label__1Kk0v")
+  // 스크롤 끝나면 링크 수집
+  const elements = await page.$$("[data-cy='job-card']")
+  const links = new Set()
+  for (let element of elements) {
+    const linkElement = await element.$("a")
+    const href = await page.evaluate(el => el.href, linkElement)
+    links.add(href)
+  }
 
-  await page.waitForSelector(".slick-slide")
+  const countMap = new Map()
 
-  const cards = await page.$$(".Card_className__u5rsb")
+  // 각 페이지 별 작업
+  for (let link of Array.from(links)) {
+    const newPage = await browser.newPage()
+    await newPage.setViewport({ width: 1280, height: 720 })
+    await newPage.goto(link)
 
-  const el = await page.evaluate(el => el.outerHTML, cards)
-  console.log(el)
+    await newPage.waitForSelector(".JobHeader_className__HttDA")
 
-  console.log(cards[0])
-  //   await cards[0].$("a").click()
+    const relevantTexts = await newPage.$$eval("h6", headers => {
+      let texts = []
+
+      for (let header of headers) {
+        if (
+          header.textContent === "자격요건" ||
+          header.textContent === "우대사항"
+        ) {
+          let spanText =
+            header.nextElementSibling.querySelector("span").textContent
+
+          texts.push(spanText)
+        }
+      }
+
+      return texts
+    })
+
+    for (let text of relevantTexts) {
+      const matches = text.match(/[a-zA-Z0-9#.]+/g)
+      if (matches) {
+        for (let match of matches) {
+          const upperMatch = match.toUpperCase()
+          const count = countMap.get(upperMatch) || 0
+          countMap.set(upperMatch, count + 1)
+        }
+      }
+    }
+
+    console.log(Array.from(countMap.entries()))
+
+    newPage.close()
+  }
 }
 
 run()
